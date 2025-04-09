@@ -1,6 +1,13 @@
 import numpy as np
 from scipy.stats import norm
 
+"""
+Black-Scholes Model:
+A classic financial model that simulates asset price dynamics under constant drift and volatility using Geometric Brownian Motion (GBM).
+Widely used for pricing European-style options under the assumption of lognormal price distribution and no volatility variation over time.
+"""
+
+
 def simulate_gbm(S0, mu, sigma, T, dt, n_paths): #S0: initial stock price, mu: drift, sigma: volatility, T: total time horizon, dt: Time step, n_paths: Number of simulation paths
      N = int(T/ dt) #Calculates how many time steps to simulate
      t = np.linspace(0, T, N) #Generates a time grid from t = 0 to t = T with N points
@@ -13,7 +20,7 @@ def simulate_gbm(S0, mu, sigma, T, dt, n_paths): #S0: initial stock price, mu: d
 
 def black_scholes_price(S, K, T, r, sigma, option_type="call"):
     d1 = (np.log(S / K) + (r + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
-    d2 = d1 - sigma * sp.sqrt(T)
+    d2 = d1 - sigma * np.sqrt(T)
     if option_type == "call":
         return S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
     else:

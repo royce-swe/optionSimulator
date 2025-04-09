@@ -1,5 +1,12 @@
 import numpy as np
 
+"""
+SABR Model (Stochastic Alpha Beta Rho):
+A stochastic volatility model commonly used in interest rate and FX derivatives markets.
+Characterized by a flexible power-law (beta) term, it models both the forward price and its volatility as correlated stochastic processes, enabling it to capture skew and smile effects in implied volatility surfaces.
+"""
+
+
 def simulate_sabr(S0, alpha, beta, rho, nu, T, dt, n_paths):
     n_steps = int(T / dt)
     t = np.linspace(0, T, n_steps)

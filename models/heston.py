@@ -1,5 +1,10 @@
 import numpy as np
 
+"""
+Heston Model:
+A stochastic volatility model that extends Black-Scholes by allowing volatility itself to vary over time.
+The asset price and variance follow two correlated stochastic differential equations, capturing real-world market phenomena like volatility clustering and the volatility smile.
+"""
 
 def simulate_heston(S0, v0, mu, kappa, theta, xi, rho, T, dt, n_paths):
     N = int(T / dt)
