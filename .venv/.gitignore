@@ -1,0 +1,8 @@
+# Ignore the 'utils' folder
+/utils/
+
+# Ignore the 'cplus-models' folder
+/cplus-models/
+
+# Ignore the 'american_gui.py' file
+/gui/american_gui.py

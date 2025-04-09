@@ -6,7 +6,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import tkinter as tk
 from models.black_scholes import simulate_gbm
-from gui.plots import plot_paths, plot_heston_paths, plot_sabr_paths, plot_black_scholes_3d
+from models.monte_carlo import monte_carlo_american_option
+from gui.plots import plot_paths, plot_heston_paths, plot_sabr_paths, plot_black_scholes_3d, plot_monte_carlo_distribution
 import yfinance as yf
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -16,16 +17,37 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 df = yf.download("AAPL", start="2020-01-01", end="2023-01-01")
 df = df.xs("AAPL", level=1, axis=1)
 df['LogReturns'] = np.log(df['Close'] / df['Close'].shift(1))
-mu_val = df['LogReturns'].mean() * 252
-sigma_val = df['LogReturns'].std() * np.sqrt(252)
+mu_val = df['LogReturns'].mean() * 252 #Calculate Drift
+sigma_val = df['LogReturns'].std() * np.sqrt(252) #Calculate Volitility
 
 # GUI setup
 root = tk.Tk()
 root.title("Stochastic Model Simulator")
-root.geometry("1200x1200")  # Wider instead of taller
+root.geometry("1200x1200")
 
-# Create left and right frames
-left_frame = tk.Frame(root, padx=10)
+# Create a canvas and scrollbar
+canvas = tk.Canvas(root)
+scrollbar = tk.Scrollbar(root, orient="vertical", command=canvas.yview)
+canvas.configure(yscrollcommand=scrollbar.set)
+
+# Create a frame inside the canvas to hold all the content
+scrollable_frame = tk.Frame(canvas)
+
+# Add the scrollable frame to the canvas
+canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+# Pack the canvas and scrollbar
+canvas.pack(side="left", fill="both", expand=True)
+scrollbar.pack(side="right", fill="y")
+
+# Configure the scroll region when the frame size changes
+def configure_scroll_region(event):
+    canvas.configure(scrollregion=canvas.bbox("all"))
+
+scrollable_frame.bind("<Configure>", configure_scroll_region)
+
+# Create left and right frames inside the scrollable frame
+left_frame = tk.Frame(scrollable_frame, padx=10)
 left_frame.pack(side=tk.LEFT, fill=tk.Y)
 
 right_frame = tk.Frame(root, padx=10)
@@ -71,6 +93,15 @@ entry_sigma = labeled_entry(left_frame, "Volatility (σ)", "0.2")
 option_type_var = tk.StringVar(value="call")  # Default is "call"
 option_menu = tk.OptionMenu(left_frame, option_type_var, "call", "put")
 option_menu.pack(pady=5)
+
+tk.Label(left_frame, text="--- American Option Monte Carlo ---").pack()
+entry_K = labeled_entry(left_frame, "Strike Price (K)", "100")
+entry_T_american = labeled_entry(left_frame, "Time to Maturity (T)", "1.0")
+entry_r_american = labeled_entry(left_frame, "Risk-Free Rate (r)", "0.05")
+entry_n_sim = labeled_entry(left_frame, "Number of Simulations", "10000")
+american_option_type_var = tk.StringVar(value="put")
+option_menu_am = tk.OptionMenu(left_frame, american_option_type_var, "call", "put")
+option_menu_am.pack(pady=5)
 
 
 def display_plot(fig):
@@ -134,16 +165,38 @@ def run_black_scholes_simulation():
     fig = plot_black_scholes_3d(S=S0, r=r, sigma=sigma, T_min=T_min, T_max=T_max, option_type=option_type)
     display_plot(fig)
 
+def run_american_option_simulation():
+    S0 = float(entry_S0.get())
+    K = float(entry_K.get())
+    T = float(entry_T_american.get())
+    r = float(entry_r_american.get())
+    n_sim = int(entry_n_sim.get())
+    mu = float(entry_mu.get())
+    sigma = float(entry_sigma.get())
+    dt = float(entry_dt.get())
+    option_type = american_option_type_var.get()
+
+    price, payoffs = monte_carlo_american_option(
+        S0=S0, K=K, mu=mu, sigma=sigma, T=T, dt=dt,
+        n_simulations=n_sim, r=r, option_type=option_type
+    )
+
+    fig = plot_monte_carlo_distribution(payoffs, option_type=option_type)
+    display_plot(fig)
+
+
+
+# Buttons for simulations
 tk.Button(left_frame, text="Run GBM Simulation", command=run_simulation).pack(pady=5)
 tk.Button(left_frame, text="Run Heston Simulation", command=run_heston_simulation).pack(pady=5)
 tk.Button(left_frame, text="Run SABR Simulation", command=run_sabr_simulation).pack(pady=5)
 tk.Button(left_frame, text="Run Black-Scholes Simulation", command=run_black_scholes_simulation).pack(pady=5)
+tk.Button(left_frame, text="Run American Option Simulation", command=run_american_option_simulation).pack(pady=5)
 
 def on_closing():
     root.quit()
     root.destroy()
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
-
 
 root.mainloop()

@@ -67,15 +67,11 @@ def plot_black_scholes_3d(S, r, sigma, T_min, T_max, option_type="call"):
     ax.grid(True)
     return fig
 
-"""
-def plot_black_scholes_vs_strike(S, T, r, sigma, option_type="call"):
-    K_vals = np.linspace(50, 150, 100)
-    prices = [black_scholes_price(S, K, T, r, sigma, option_type) for K in K_vals]
+def plot_monte_carlo_distribution(discounted_payoffs, option_type="call"):
     fig, ax = plt.subplots()
-    ax.plot(K_vals, prices)
-    ax.set_title(f"Black-Scholes Option Price vs Strike ({option_type.title()})")
-    ax.set_xlabel("Strike Price (K)")
-    ax.set_ylabel("Option Price")
+    ax.hist(discounted_payoffs, bins=50, alpha=0.75, color='skyblue', edgecolor='black')
+    ax.set_title(f"Monte Carlo {option_type.title()} Option Payoff Distribution")
+    ax.set_xlabel("Discounted Payoff")
+    ax.set_ylabel("Frequency")
     ax.grid(True)
     return fig
-"""

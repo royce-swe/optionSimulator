@@ -1,5 +1,5 @@
 import numpy as np
-from black_scholes import simulate_gbm
+from .black_scholes import simulate_gbm
 from sklearn.linear_model import LinearRegression
 
 def monte_carlo_american_option(S0, K, mu, sigma, T, dt, n_simulations, r, option_type="call"):
@@ -46,4 +46,5 @@ def monte_carlo_american_option(S0, K, mu, sigma, T, dt, n_simulations, r, optio
 
     # Calculate the option price as the discounted average of payoffs
     option_price = np.exp(-r * T) * np.mean(payoff[:, 0])  # Discounted average payoff at time 0
-    return option_price
+    return option_price, payoff[:, 0]  # Return all payoffs at time 0
+
