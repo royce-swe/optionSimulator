@@ -42,7 +42,7 @@ scrollbar.pack(side="right", fill="y")
 
 # Configure the scroll region when the frame size changes
 def configure_scroll_region(event):
-    canvas.configure(scrollregion=canvas.bbox("all"))
+    scrollable_frame.configure(scrollregion=canvas.bbox("all"))
 
 scrollable_frame.bind("<Configure>", configure_scroll_region)
 
@@ -97,9 +97,9 @@ option_menu.pack(pady=5)
 tk.Label(left_frame, text="--- American Option Monte Carlo ---").pack()
 entry_K = labeled_entry(left_frame, "Strike Price (K)", "100")
 entry_T_american = labeled_entry(left_frame, "Time to Maturity (T)", "1.0")
-entry_r_american = labeled_entry(left_frame, "Risk-Free Rate (r)", "0.05")
-entry_n_sim = labeled_entry(left_frame, "Number of Simulations", "10000")
-american_option_type_var = tk.StringVar(value="put")
+entry_r_american = labeled_entry(left_frame, "Risk-Free Rate (r)", "0.80")
+entry_n_sim = labeled_entry(left_frame, "Number of Simulations", "100000")
+american_option_type_var = tk.StringVar(value="call")
 option_menu_am = tk.OptionMenu(left_frame, american_option_type_var, "call", "put")
 option_menu_am.pack(pady=5)
 
@@ -171,10 +171,11 @@ def run_american_option_simulation():
     T = float(entry_T_american.get())
     r = float(entry_r_american.get())
     n_sim = int(entry_n_sim.get())
-    mu = float(entry_mu.get())
     sigma = float(entry_sigma.get())
     dt = float(entry_dt.get())
     option_type = american_option_type_var.get()
+
+    mu = r  # << IMPORTANT: risk-neutral drift for pricing
 
     price, payoffs = monte_carlo_american_option(
         S0=S0, K=K, mu=mu, sigma=sigma, T=T, dt=dt,
@@ -191,7 +192,7 @@ tk.Button(left_frame, text="Run GBM Simulation", command=run_simulation).pack(pa
 tk.Button(left_frame, text="Run Heston Simulation", command=run_heston_simulation).pack(pady=5)
 tk.Button(left_frame, text="Run SABR Simulation", command=run_sabr_simulation).pack(pady=5)
 tk.Button(left_frame, text="Run Black-Scholes Simulation", command=run_black_scholes_simulation).pack(pady=5)
-tk.Button(left_frame, text="Run American Option Simulation", command=run_american_option_simulation).pack(pady=5)
+tk.Button(left_frame, text="Run Monte Carlo Simulation", command=run_american_option_simulation).pack(pady=5)
 
 def on_closing():
     root.quit()
