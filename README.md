@@ -24,3 +24,4 @@ A powerful and interactive GUI-based tool to visualize and simulate option price
    ```bash
    git clone https://github.com/royce-swe/optionSimulator.git
    cd optionSimulator
+   python gui/main_gui.py
